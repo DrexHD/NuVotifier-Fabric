@@ -15,7 +15,6 @@ import com.vexsoftware.votifier.platform.VotifierPlugin;
 import com.vexsoftware.votifier.platform.scheduler.ScheduledExecutorServiceVotifierScheduler;
 import com.vexsoftware.votifier.platform.scheduler.VotifierScheduler;
 import com.vexsoftware.votifier.support.forwarding.ForwardedVoteListener;
-import com.vexsoftware.votifier.support.forwarding.ForwardingVoteSink;
 import com.vexsoftware.votifier.util.KeyCreator;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -36,8 +35,9 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
 
     public static final Logger LOGGER = LoggerFactory.getLogger("nuvotifier");
 
-    private SLF4JLogger loggerAdapter;
+    private static NuVotifier instance;
 
+    private SLF4JLogger loggerAdapter;
 
     public File configDir = FabricLoader.getInstance().getConfigDir().toFile();
 
@@ -175,12 +175,13 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
      */
     private final Map<String, Key> tokens = new HashMap<>();
 
-    private ForwardingVoteSink forwardingMethod;
+    private FabricMessagingForwardingSink forwardingMethod;
 
     private MinecraftServer server;
 
     @Override
     public void onInitializeServer() {
+        instance = this;
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> NuVotifierCommand.register(this, dispatcher));
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> this.reload());
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
@@ -264,7 +265,18 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
         fireVoteEvent(v);
     }
 
+    public FabricMessagingForwardingSink getForwardingMethod() {
+        return forwardingMethod;
+    }
+
     private void fireVoteEvent(final Vote vote) {
         server.submit(() -> VoteListener.EVENT.invoker().onVote(vote));
+    }
+
+    public static NuVotifier getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("NuVotifier plugin is not yet initialized");
+        }
+        return instance;
     }
 }

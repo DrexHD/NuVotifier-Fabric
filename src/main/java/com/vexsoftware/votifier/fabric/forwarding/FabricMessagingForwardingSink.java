@@ -3,22 +3,23 @@ package com.vexsoftware.votifier.fabric.forwarding;
 import com.vexsoftware.votifier.fabric.NuVotifier;
 import com.vexsoftware.votifier.support.forwarding.AbstractPluginMessagingForwardingSink;
 import com.vexsoftware.votifier.support.forwarding.ForwardedVoteListener;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
-public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwardingSink implements ServerPlayNetworking.PlayChannelHandler {
+public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwardingSink implements ServerPlayNetworking.PlayPayloadHandler<PluginMessagePayload> {
 
     private final String channel;
+
+    private final CustomPacketPayload.Type<PluginMessagePayload> type;
 
     public FabricMessagingForwardingSink(String channel, ForwardedVoteListener listener) {
         super(listener);
         this.channel = channel;
-        ServerPlayNetworking.registerGlobalReceiver(new ResourceLocation(channel), this);
+        this.type = CustomPacketPayload.createType(channel);
+        PayloadTypeRegistry.playC2S().register(type, PluginMessagePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
 
     @Override
@@ -26,14 +27,15 @@ public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwar
         ServerPlayNetworking.unregisterGlobalReceiver(new ResourceLocation(channel));
     }
 
-    @Override
-    public void receive(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
-        byte[] data = new byte[buf.readableBytes()];
-        buf.readBytes(data);
+    public void receive(PluginMessagePayload payload, ServerPlayNetworking.Context context) {
         try {
-            this.handlePluginMessage(data);
+            this.handlePluginMessage(payload.data());
         } catch (Exception e) {
             NuVotifier.LOGGER.error("There was an unknown error when processing a forwarded vote.", e);
         }
+    }
+
+    public CustomPacketPayload.Type<PluginMessagePayload> type() {
+        return type;
     }
 }
