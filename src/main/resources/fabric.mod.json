@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "nuvotifier-fabric",
+	"version": "${version}",
+	"name": "nuvotifier-fabric",
+	"description": "Safe, smart, and secure Votifier server mod",
+	"authors": [
+		"Drex"
+	],
+	"license": "GPLv3",
+	"environment": "server",
+	"entrypoints": {
+		"server": [
+			"com.vexsoftware.votifier.fabric.NuVotifier"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.15.6",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
