@@ -17,14 +17,14 @@ public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwar
     public FabricMessagingForwardingSink(String channel, ForwardedVoteListener listener) {
         super(listener);
         this.channel = channel;
-        this.type = CustomPacketPayload.createType(channel);
+        this.type = new CustomPacketPayload.Type<>(ResourceLocation.parse(channel));
         PayloadTypeRegistry.playC2S().register(type, PluginMessagePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
 
     @Override
     public void halt() {
-        ServerPlayNetworking.unregisterGlobalReceiver(new ResourceLocation(channel));
+        ServerPlayNetworking.unregisterGlobalReceiver(ResourceLocation.parse(channel));
     }
 
     public void receive(PluginMessagePayload payload, ServerPlayNetworking.Context context) {
