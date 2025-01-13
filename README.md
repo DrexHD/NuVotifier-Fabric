@@ -23,11 +23,12 @@ Latest Votifier version: [![](https://jitpack.io/v/NuVotifier/NuVotifier.svg)](h
 ```gradle
 repositories {
 	maven { url 'https://jitpack.io' }
+	maven { url "https://api.modrinth.com/maven" }
 }
 
 dependencies {
 	implementation("com.github.NuVotifier.NuVotifier:nuvotifier-api:VERSION")
-	implementation 'com.github.DrexHD:NuVotifier-Fabric:VERSION'
+	modImplementation("maven.modrinth:nuvotifier-fabric:VERSION")
 }
 ```
 
