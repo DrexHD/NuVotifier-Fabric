@@ -16,6 +16,7 @@ base {
 
 repositories {
     maven { url 'https://jitpack.io' }
+    maven { url "https://maven.nucleoid.xyz/" }
     mavenCentral()
 }
 
@@ -25,25 +26,12 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    Set<String> apiModules = [
-            "fabric-api-base",
-            "fabric-command-api-v1",
-            "fabric-lifecycle-events-v1",
-            "fabric-networking-api-v1"
-    ]
-
-    apiModules.forEach {
-        modImplementation(fabricApi.module(it, project.fabric_version))
-    }
-
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     implementation(include("org.yaml:snakeyaml:2.0"))
     modImplementation(include("me.lucko:fabric-permissions-api:${fabric_permissions_version}"))
 
-	implementation(include("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2"))
-	implementation(include("com.github.NuVotifier.NuVotifier:nuvotifier-common:2.7.2"))
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
+    implementation(include("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2"))
+    implementation(include("com.github.NuVotifier.NuVotifier:nuvotifier-common:2.7.2"))
 }
 
 processResources {
