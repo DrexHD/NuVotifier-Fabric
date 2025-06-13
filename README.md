@@ -27,7 +27,6 @@ repositories {
 }
 
 dependencies {
-	implementation("com.github.NuVotifier.NuVotifier:nuvotifier-api:VERSION")
 	modImplementation("maven.modrinth:nuvotifier-fabric:VERSION")
 }
 ```
