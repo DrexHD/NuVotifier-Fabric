@@ -39,13 +39,22 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
 
     private SLF4JLogger loggerAdapter;
 
-    public File configDir = FabricLoader.getInstance().getConfigDir().toFile();
+    public File configDir = FabricLoader.getInstance().getConfigDir().resolve("NuVotifier").toFile();
 
     private VotifierScheduler scheduler;
 
     private boolean loadAndBind() {
         // Load configuration.
         ConfigLoader.loadConfig(this);
+
+        /*
+         * Create NuVotifier Config directory if it does not exist
+         */
+        if (!configDir.exists()) {
+            if (!configDir.mkdir()) {
+                throw new RuntimeException("Unable to create the NuVotifier config folder " + configDir);
+            }
+        }
 
         /*
          * Create RSA directory and keys if it does not exist; otherwise, read
