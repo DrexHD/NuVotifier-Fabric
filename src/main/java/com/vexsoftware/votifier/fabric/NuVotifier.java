@@ -16,6 +16,7 @@ import com.vexsoftware.votifier.platform.scheduler.ScheduledExecutorServiceVotif
 import com.vexsoftware.votifier.platform.scheduler.VotifierScheduler;
 import com.vexsoftware.votifier.support.forwarding.ForwardedVoteListener;
 import com.vexsoftware.votifier.util.KeyCreator;
+import java.io.IOException;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -50,11 +51,17 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
         /*
          * Create NuVotifier Config directory if it does not exist
          */
-        if (!configDir.exists()) {
-            if (!configDir.mkdir()) {
-                throw new RuntimeException("Unable to create the NuVotifier config folder " + configDir);
+        try {
+            if (!configDir.exists()) {
+                if (!configDir.mkdir()) {
+                    throw new RuntimeException("Unable to create the NuVotifier config folder " + configDir);
+                }
             }
+        } catch (RuntimeException ex) {
+            LOGGER.error("Unable to create the NuVotifier config folder", ex);
+            return false;
         }
+
 
         /*
          * Create RSA directory and keys if it does not exist; otherwise, read
