@@ -143,18 +143,18 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
     }
 
     /**
-     * Onetime migration of the config from config/rsa and config/nuvotifier.yml to config/nuvotifier/
+     * Onetime migration of the config from config/rsa and config/nuvotifier.yml to config/NuVotifier/
      */
     private boolean migrateConfig() {
         File configFile = FabricLoader.getInstance().getConfigDir().resolve("nuvotifier.yml").toFile();
         File rsaDir = FabricLoader.getInstance().getConfigDir().resolve("rsa").toFile();
         try {
             if (configFile.exists()) {
-                LOGGER.info("Migrating config from config/nuvotifier.yml to config/nuvotifier/nuvotifier.yml");
+                LOGGER.info("Migrating config from config/nuvotifier.yml to config/NuVotifier/nuvotifier.yml");
                 configFile.renameTo(new File(configDir, "nuvotifier.yml"));
             }
             if (rsaDir.exists()) {
-                LOGGER.info("Migrating RSA keys from config/rsa to config/nuvotifier/rsa");
+                LOGGER.info("Migrating RSA keys from config/rsa to config/NuVotifier/rsa");
                 rsaDir.renameTo(new File(configDir, "rsa"));
             }
         } catch (Exception e) {
