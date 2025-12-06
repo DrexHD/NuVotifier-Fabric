@@ -16,6 +16,12 @@ import com.vexsoftware.votifier.platform.scheduler.ScheduledExecutorServiceVotif
 import com.vexsoftware.votifier.platform.scheduler.VotifierScheduler;
 import com.vexsoftware.votifier.support.forwarding.ForwardedVoteListener;
 import com.vexsoftware.votifier.util.KeyCreator;
+import java.io.File;
+import java.security.Key;
+import java.security.KeyPair;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -23,13 +29,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.security.Key;
-import java.security.KeyPair;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executors;
 
 public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteListener, DedicatedServerModInitializer {
 
@@ -39,11 +38,33 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
 
     private SLF4JLogger loggerAdapter;
 
-    public File configDir = FabricLoader.getInstance().getConfigDir().toFile();
+    public File configDir = FabricLoader.getInstance().getConfigDir().resolve("NuVotifier").toFile();
 
     private VotifierScheduler scheduler;
 
     private boolean loadAndBind() {
+        /*
+         * Create NuVotifier Config directory if it does not exist
+         */
+        try {
+            if (!configDir.exists()) {
+                if (!configDir.mkdir()) {
+                    throw new RuntimeException("Unable to create the NuVotifier config folder " + configDir);
+                }
+            }
+        } catch (RuntimeException ex) {
+            LOGGER.error("Unable to create the NuVotifier config folder", ex);
+            return false;
+        }
+
+        // Check if there is an old config
+        if (FabricLoader.getInstance().getConfigDir().resolve("nuvotifier.yml").toFile().exists()) {
+            // Migrate config
+            if (!migrateConfig()) {
+                return false;
+            }
+        }
+
         // Load configuration.
         ConfigLoader.loadConfig(this);
 
@@ -118,6 +139,29 @@ public class NuVotifier implements VoteHandler, VotifierPlugin, ForwardedVoteLis
                 LOGGER.error("No vote forwarding method '" + method + "' known. Defaulting to noop implementation.");
             }
         }
+        return true;
+    }
+
+    /**
+     * Onetime migration of the config from config/rsa and config/nuvotifier.yml to config/NuVotifier/
+     */
+    private boolean migrateConfig() {
+        File configFile = FabricLoader.getInstance().getConfigDir().resolve("nuvotifier.yml").toFile();
+        File rsaDir = FabricLoader.getInstance().getConfigDir().resolve("rsa").toFile();
+        try {
+            if (configFile.exists()) {
+                LOGGER.info("Migrating config from config/nuvotifier.yml to config/NuVotifier/nuvotifier.yml");
+                configFile.renameTo(new File(configDir, "nuvotifier.yml"));
+            }
+            if (rsaDir.exists()) {
+                LOGGER.info("Migrating RSA keys from config/rsa to config/NuVotifier/rsa");
+                rsaDir.renameTo(new File(configDir, "rsa"));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error migrating config!", e);
+            return false;
+        }
+
         return true;
     }
 
