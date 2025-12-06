@@ -6,7 +6,7 @@ import com.vexsoftware.votifier.support.forwarding.ForwardedVoteListener;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwardingSink implements ServerPlayNetworking.PlayPayloadHandler<PluginMessagePayload> {
 
@@ -17,14 +17,14 @@ public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwar
     public FabricMessagingForwardingSink(String channel, ForwardedVoteListener listener) {
         super(listener);
         this.channel = channel;
-        this.type = new CustomPacketPayload.Type<>(ResourceLocation.parse(channel));
+        this.type = new CustomPacketPayload.Type<>(Identifier.parse(channel));
         PayloadTypeRegistry.playC2S().register(type, PluginMessagePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
 
     @Override
     public void halt() {
-        ServerPlayNetworking.unregisterGlobalReceiver(ResourceLocation.parse(channel));
+        ServerPlayNetworking.unregisterGlobalReceiver(Identifier.parse(channel));
     }
 
     public void receive(PluginMessagePayload payload, ServerPlayNetworking.Context context) {
