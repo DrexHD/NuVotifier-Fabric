@@ -17,12 +17,12 @@ implementation has been moved away from the main repository for two reasons:
 
 You can include NuVotifier-Fabric into your gradle project using the following lines:
 
-Latest NuVotifier-Fabric version: [![](https://jitpack.io/v/DrexHD/NuVotifier-Fabric.svg)](https://jitpack.io/#DrexHD/NuVotifier-Fabric)
+Latest NuVotifier-Fabric version: [![](https://img.shields.io/modrinth/v/Jnh9oSBU)](https://modrinth.com/mod/nuvotifier-fabric)
 
-Latest Votifier version: [![](https://jitpack.io/v/NuVotifier/NuVotifier.svg)](https://jitpack.io/#NuVotifier/NuVotifier)
+Latest NuVotifier version: [![](https://jitpack.io/v/NuVotifier/NuVotifier.svg)](https://jitpack.io/#NuVotifier/NuVotifier)
 ```gradle
 repositories {
-	maven { url 'https://jitpack.io' }
+	maven { url 'https://jitpack.io' } // required for NuVotifier
 	maven { url "https://api.modrinth.com/maven" }
 }
 

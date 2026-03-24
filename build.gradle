@@ -53,7 +53,7 @@ publishMods {
     file = jar.archiveFile
     additionalFiles.from(tasks.named("sourcesJar"))
     type = STABLE
-    displayName = "NuVotifier-Fabric ${version}"
+    displayName = "NuVotifier-Fabric ${version.get()}"
     changelog = fetchChangelog()
 
     modLoaders.add("fabric")
