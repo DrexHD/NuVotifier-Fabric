@@ -7,10 +7,12 @@ import com.vexsoftware.votifier.fabric.NuVotifier;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.net.VotifierSession;
 import com.vexsoftware.votifier.util.ArgsToVote;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 
 import java.util.function.Predicate;
 
@@ -20,21 +22,23 @@ import static net.minecraft.commands.Commands.literal;
 public class NuVotifierCommand {
 
     private static NuVotifier plugin;
+    private static final Permission RELOAD = new Permission.Atom(Identifier.fromNamespaceAndPath("nuvotifier", "reload"));
+    private static final Permission TESTVOTE = new Permission.Atom(Identifier.fromNamespaceAndPath("nuvotifier", "testvote"));
 
     public static void register(NuVotifier plugin, CommandDispatcher<CommandSourceStack> dispatcher) {
         NuVotifierCommand.plugin = plugin;
-        Predicate<CommandSourceStack> reloadPerm = Permissions.require("nuvotifier.reload", 2);
-        Predicate<CommandSourceStack> testVotePerm = Permissions.require("nuvotifier.testvote", 2);
+        Predicate<CommandSourceStack> reloadPerm = src -> src.permissions().hasPermission(RELOAD) || src.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS));
+        Predicate<CommandSourceStack> testVotePerm = src -> src.permissions().hasPermission(TESTVOTE) || src.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS));
         dispatcher.register(
-                literal("nuvotifier").requires(reloadPerm.or(testVotePerm))
-                        .then(
-                        literal("reload").requires(reloadPerm)
-                                .executes(NuVotifierCommand::reload)
+            literal("nuvotifier").requires(reloadPerm.or(testVotePerm))
+                .then(
+                    literal("reload").requires(reloadPerm)
+                        .executes(NuVotifierCommand::reload)
                 ).then(
-                        literal("testvote").then(
-                                argument("args", StringArgumentType.greedyString()).requires(testVotePerm)
-                                        .executes(NuVotifierCommand::sendTestVote)
-                        )
+                    literal("testvote").then(
+                        argument("args", StringArgumentType.greedyString()).requires(testVotePerm)
+                            .executes(NuVotifierCommand::sendTestVote)
+                    )
                 )
         );
     }

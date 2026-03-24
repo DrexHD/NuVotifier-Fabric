@@ -1,7 +1,7 @@
 import org.jetbrains.changelog.Changelog
 
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
     id 'maven-publish'
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
     id 'org.jetbrains.changelog' version '2.+'
@@ -23,12 +23,10 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     api(include("org.yaml:snakeyaml:2.0"))
-    modImplementation(include("me.lucko:fabric-permissions-api:${fabric_permissions_version}"))
 
     api(include("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2"))
     api(include("com.github.NuVotifier.NuVotifier:nuvotifier-common:2.7.2"))
@@ -43,14 +41,19 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 25
+}
+
+tasks.register("sourcesJar", Jar) {
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
 }
 
 publishMods {
-    file = remapJar.archiveFile
-    additionalFiles.from(remapSourcesJar.archiveFile)
+    file = jar.archiveFile
+    additionalFiles.from(tasks.named("sourcesJar"))
     type = STABLE
-    displayName = "NuVotifier-Fabric ${version.get()}"
+    displayName = "NuVotifier-Fabric ${version}"
     changelog = fetchChangelog()
 
     modLoaders.add("fabric")
@@ -72,8 +75,8 @@ publishMods {
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

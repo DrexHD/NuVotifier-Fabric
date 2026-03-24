@@ -18,7 +18,7 @@ public class FabricMessagingForwardingSink extends AbstractPluginMessagingForwar
         super(listener);
         this.channel = channel;
         this.type = new CustomPacketPayload.Type<>(Identifier.parse(channel));
-        PayloadTypeRegistry.playC2S().register(type, PluginMessagePayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(type, PluginMessagePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
 
